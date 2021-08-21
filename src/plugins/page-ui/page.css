@@ -1,0 +1,18 @@
+.custom-page {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0;
+  overflow: hidden;
+  color: #000;
+  line-height: inherit;
+  width: 810px;
+  box-sizing: border-box;
+  height: 1122px;
+  padding: 39px 52px;
+  background: #ccc;
+  outline: 1px solid;
+}
+.custom-page + .custom-page {
+  margin-top: 40px;
+}
