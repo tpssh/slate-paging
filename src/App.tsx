@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef, useContext } from 'react'
 import {
   Plate,
   createReactPlugin,
@@ -58,7 +58,7 @@ import {
 import { useStoreEditorRef, useEventEditorStore } from '@udecode/plate-core'
 import { useReactToPrint } from 'react-to-print'
 import { ReactEditor } from 'slate-react'
-import { Transforms } from 'slate'
+import { Transforms, Editor as slateEditor } from 'slate'
 import useStyledComponents from './styledComponents'
 import { HeadingToolbar } from '@udecode/plate-toolbar'
 import {
@@ -79,7 +79,7 @@ import {
   optionsExitBreakPlugin,
   optionsSoftBreakPlugin
 } from './config/pluginOptions'
-import { ConfigContext, setConfigValue } from './env'
+import { ConfigContext, PageContext } from './env'
 import { createPagePlugin } from './plugins/page'
 const RichText = ({ config, eventBus }: any) => {
   const { model: modelenv, id } = config
@@ -181,15 +181,17 @@ const RichText = ({ config, eventBus }: any) => {
 
       return plugins
     }, [])
+    const editor = useStoreEditorRef()
     let [value, setValue] = useState<any>(initialValuePasteHtml)
     const editableProps = {
       // placeholder: 'Type…',
       style: {
-        width: '810px',
+        width: '794px',
         minHeight: '500px',
         outline: '1px solid rgb(238, 238, 238)'
       }
     }
+    const pageContext = useContext(PageContext)
     return (
       <ConfigContext.Provider value={config}>
         <Plate
@@ -197,13 +199,16 @@ const RichText = ({ config, eventBus }: any) => {
           plugins={pluginsMemo}
           onChange={(val) => {
             console.log(val)
-            setValue(val)
+            editor && slateEditor.normalize(editor)
+            console.log('normalize 开始拉')
+            pageContext.setData(val)
+            // setValue(val)
             // pubInstance.publish('update', val)
           }}
           components={styledComponents}
           options={defaultOptions}
           editableProps={editableProps}
-          value={value}
+          initialValue={value}
         >
           {/* <HeadingToolbar styles={{ root: { margin: '0px -20px 0' } }}>
             <ToolbarButtonsBasicElements />
