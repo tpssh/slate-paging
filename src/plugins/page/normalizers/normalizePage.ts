@@ -125,7 +125,6 @@ function moveChildToNextPage(
   formPath: Path,
   toPath: Path
 ): void {
-  debugger
   Transforms.moveNodes(editor, {
     at: formPath,
     match(n) {
@@ -155,7 +154,6 @@ function createPageAndMove(
   formPath: Path,
   entryNode: Node
 ) {
-  debugger
   // need create page node
   Transforms.wrapNodes(editor, emptyPage, {
     at: formPath,
@@ -201,7 +199,6 @@ function riseElementToPrevPage(
   formPath: Path,
   toPath: Path
 ) {
-  debugger
   Transforms.moveNodes(editor, {
     at: formPath,
     // eslint-disable-next-line space-before-function-paren

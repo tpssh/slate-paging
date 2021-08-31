@@ -35,11 +35,13 @@ export const optionsResetBlockTypePlugin: ResetBlockTypePluginOptions = {
 export const optionsExitBreakPlugin: ExitBreakPluginOptions = {
   rules: [
     {
-      hotkey: 'mod+enter'
+      hotkey: 'mod+enter',
+      level: 1
     },
     {
       hotkey: 'mod+shift+enter',
-      before: true
+      before: true,
+      level: 1
     },
     {
       hotkey: 'enter',

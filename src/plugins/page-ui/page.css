@@ -6,7 +6,7 @@
   overflow: hidden;
   color: #000;
   line-height: inherit;
-  width: 810px;
+  width: 794px;
   box-sizing: border-box;
   height: 1122px;
   padding: 39px 52px;
@@ -14,5 +14,5 @@
   outline: 1px solid;
 }
 .custom-page + .custom-page {
-  margin-top: 40px;
+  /* margin-top: 40px; */
 }
