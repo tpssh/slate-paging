@@ -8,8 +8,8 @@ export default function Paging(props: any) {
   const arrs = new Array(data.page).fill('')
   // 一页的高度  用于计算位置
   const pageHeight = 1122
-  const pageToolHeight = 0
-  // const pageToolHeight = 60
+  // const pageToolHeight = 0
+  const pageToolHeight = 60
   const selfHeight = 44
   const changeHeader = (e: string) => {
     pageContext.setPageData({ ...data, headerValue: e })
