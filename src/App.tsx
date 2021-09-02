@@ -79,8 +79,9 @@ import {
   optionsExitBreakPlugin,
   optionsSoftBreakPlugin
 } from './config/pluginOptions'
-import { ConfigContext, PageContext } from './env'
+import { ConfigContext, PageContext, PageProvider } from './env'
 import { createPagePlugin } from './plugins/page'
+import Paging from './components/paging/index'
 const RichText = ({ config, eventBus }: any) => {
   const { model: modelenv, id } = config
   const componentRef = useRef(null)
@@ -181,6 +182,7 @@ const RichText = ({ config, eventBus }: any) => {
 
       return plugins
     }, [])
+    const pageContext = useContext(PageContext)
     const editor = useStoreEditorRef()
     let [value, setValue] = useState<any>(initialValuePasteHtml)
     const editableProps = {
@@ -191,7 +193,7 @@ const RichText = ({ config, eventBus }: any) => {
         outline: '1px solid rgb(238, 238, 238)'
       }
     }
-    const pageContext = useContext(PageContext)
+    console.log(pageContext, 'pageContext=====')
     return (
       <ConfigContext.Provider value={config}>
         <Plate
@@ -216,8 +218,9 @@ const RichText = ({ config, eventBus }: any) => {
             <ToolbarButtonsBasicMarks />
             <ToolbarButtonsAlign />
             <ToolbarButtonsTable />
-          </HeadingToolbar>
-          <BallonToolbarMarks></BallonToolbarMarks> */}
+          </HeadingToolbar> */}
+          <BallonToolbarMarks></BallonToolbarMarks>
+          <Paging></Paging>
         </Plate>
       </ConfigContext.Provider>
     )
@@ -232,7 +235,9 @@ const RichText = ({ config, eventBus }: any) => {
           : 'slate-editor-core'
       }
     >
-      <Editor />
+      <PageProvider>
+        <Editor />
+      </PageProvider>
     </div>
   )
 }

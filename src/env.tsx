@@ -12,7 +12,7 @@ interface reactStyleAttr {
 }
 interface PageInfo {
   state: any
-  pageNumber: number
+  page: number
   headerValue: string
   footerValue: string
   headerAttribute: reactStyleAttr
@@ -33,7 +33,7 @@ export const ConfigContext = React.createContext<Config>({})
 // 分页信息的
 const pageInfo: PageInfo = {
   state: {},
-  pageNumber: 0,
+  page: 1,
   headerValue: '',
   footerValue: '',
   headerAttribute: {},
@@ -42,9 +42,11 @@ const pageInfo: PageInfo = {
 
 export const PageContext = React.createContext<{
   data: PageInfo
+  setPageData(val: PageInfo): any
   setData: any
 }>({
   data: pageInfo,
+  setPageData: () => {},
   setData: () => {}
 })
 
@@ -54,18 +56,25 @@ export const PageProvider = (props: any) => {
   const providerValue = useMemo(() => {
     return {
       data,
-      setData: (val) => {
+      setData: (val: any) => {
         console.log(val, '编辑器的数据')
+        // page 是顶级元素，只要进行一层遍历
+        let page = 0
+        for (let index = 0; index < val.length; index++) {
+          const element = val[index]
+          if (element.type === 'page') {
+            page += 1
+          }
+        }
         // 计算page
         const pageInfo = {
-          state: {},
-          pageNumber: 0,
-          headerValue: '',
-          footerValue: '',
-          headerAttribute: {},
-          footerAttribute: {}
+          ...data,
+          page: page
         }
         setData(pageInfo)
+      },
+      setPageData(state: PageInfo) {
+        setData(state)
       }
     }
   }, [data, setData])

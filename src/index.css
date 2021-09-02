@@ -11,3 +11,41 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.page-input-warp {
+  position: absolute;
+  width: 790px;
+  z-index: 11;
+  padding: 12px 24px;
+  box-sizing: border-box;
+}
+.page-input-warp.active {
+  background-color: #fff;
+}
+
+.page-footer-input {
+  position: absolute;
+  width: 790px;
+  z-index: 11;
+}
+
+.page-input {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  width: 100%;
+  display: block;
+  font-size: 14px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+
+.page-content {
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  white-space: nowrap;
+}
