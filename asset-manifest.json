@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/slate-paging/static/css/main.920f5cdc.chunk.css",
+    "main.js": "/slate-paging/static/js/main.774cb05a.chunk.js",
+    "main.js.map": "/slate-paging/static/js/main.774cb05a.chunk.js.map",
+    "runtime-main.js": "/slate-paging/static/js/runtime-main.c4ac4518.js",
+    "runtime-main.js.map": "/slate-paging/static/js/runtime-main.c4ac4518.js.map",
+    "static/css/2.04607c25.chunk.css": "/slate-paging/static/css/2.04607c25.chunk.css",
+    "static/js/2.063d183e.chunk.js": "/slate-paging/static/js/2.063d183e.chunk.js",
+    "static/js/2.063d183e.chunk.js.map": "/slate-paging/static/js/2.063d183e.chunk.js.map",
+    "static/js/3.9e1648fc.chunk.js": "/slate-paging/static/js/3.9e1648fc.chunk.js",
+    "static/js/3.9e1648fc.chunk.js.map": "/slate-paging/static/js/3.9e1648fc.chunk.js.map",
+    "index.html": "/slate-paging/index.html",
+    "static/css/2.04607c25.chunk.css.map": "/slate-paging/static/css/2.04607c25.chunk.css.map",
+    "static/css/main.920f5cdc.chunk.css.map": "/slate-paging/static/css/main.920f5cdc.chunk.css.map",
+    "static/js/2.063d183e.chunk.js.LICENSE.txt": "/slate-paging/static/js/2.063d183e.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c4ac4518.js",
+    "static/css/2.04607c25.chunk.css",
+    "static/js/2.063d183e.chunk.js",
+    "static/css/main.920f5cdc.chunk.css",
+    "static/js/main.774cb05a.chunk.js"
+  ]
+}
