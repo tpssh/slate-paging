@@ -4,8 +4,10 @@ import { SPEditor } from '@udecode/plate-core'
 
 const emptyPage = {
   type: 'page',
-  children: [{ type: 'p', children: [{ type: 'text', text: '' }] }]
+  children: []
 }
+
+const EmptyParagraphHeight = 29 // empty height
 
 export const normalizePage = (editor: ReactEditor & SPEditor) => {
   // can include custom normalisations---
@@ -19,6 +21,7 @@ export const normalizePage = (editor: ReactEditor & SPEditor) => {
       let PageNode
       // afaik pageNode if inserted as new page is not available here as a dom node because it hasnt rendered yet
       try {
+        // dom maybe unrender, so node children length diff dom children length
         PageNode = ReactEditor.toDOMNode(editor, node)
       } catch (e) {
         return
@@ -40,7 +43,8 @@ export const normalizePage = (editor: ReactEditor & SPEditor) => {
       let currentPageHeight = 0
 
       const children: globalThis.Element[] = Array.from(PageNode.children)
-      console.log(pageHeight, 'is pageHeight')
+      const domChildrenLength = children.length
+      const nodeChildLength = node.children.length
       // top bottom margin merge
       let preElementBottomMargin = 0
       children.forEach((child, index) => {
@@ -59,6 +63,24 @@ export const normalizePage = (editor: ReactEditor & SPEditor) => {
           }
         }
       })
+      // exist no render nodes
+      if (domChildrenLength !== nodeChildLength) {
+        let index = nodeChildLength - 1
+        if (domChildrenLength > nodeChildLength) {
+          currentPageHeight = currentPageHeight - EmptyParagraphHeight
+        } else {
+          currentPageHeight = currentPageHeight + EmptyParagraphHeight
+        }
+        if (currentPageHeight > pageHeight) {
+          if (hasNextPage && nextPagePath) {
+            moveChildToNextPage(editor, index, path, nextPagePath)
+            return
+          } else {
+            createPageAndMove(editor, index, path, node)
+            return
+          }
+        }
+      }
       // if current page have enough height can contain next page first child node,
       //  we need move this node
       if (currentPageHeight < pageHeight && nextPageNode && nextPagePath) {
@@ -154,6 +176,8 @@ function createPageAndMove(
   formPath: Path,
   entryNode: Node
 ) {
+  // use index record nodes path, because node cant find path in this time.
+  let nodePathIndex = 0
   // need create page node
   Transforms.wrapNodes(editor, emptyPage, {
     at: formPath,
@@ -164,14 +188,7 @@ function createPageAndMove(
         Element.isElement(n) &&
         (n as any).type !== 'page'
       ) {
-        let path = null
-        try {
-          path = ReactEditor.findPath(editor, n)
-        } catch (error) {
-          // i dont know, if node path equal to selection, will throw error
-          path = (editor.selection && editor.selection.anchor.path) || []
-        }
-        return path[1] >= splitIndex
+        return nodePathIndex++ >= splitIndex
       }
       return false
     }
