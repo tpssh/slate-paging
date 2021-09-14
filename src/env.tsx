@@ -34,7 +34,7 @@ export const ConfigContext = React.createContext<Config>({})
 const pageInfo: PageInfo = {
   state: {},
   page: 1,
-  headerValue: '',
+  headerValue: '第{{page}}页 点击修改',
   footerValue: '',
   headerAttribute: {},
   footerAttribute: {}

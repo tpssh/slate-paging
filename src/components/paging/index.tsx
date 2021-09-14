@@ -28,7 +28,7 @@ export default function Paging(props: any) {
                 top: index * pageHeight + pageToolHeight + 'px'
               }}
               changeValue={changeHeader}
-              page={data.page}
+              page={index + 1}
               value={data.headerValue}
               placeholder={'点击输入页眉'}
             ></InputDiv>
@@ -38,7 +38,7 @@ export default function Paging(props: any) {
                   (index + 1) * pageHeight + pageToolHeight - selfHeight + 'px'
               }}
               changeValue={changeFooter}
-              page={data.page}
+              page={index + 1}
               value={data.footerValue}
               placeholder={'点击输入页脚'}
             ></InputDiv>

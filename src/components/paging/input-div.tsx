@@ -10,11 +10,6 @@ const compileOptions = {
 
 export default function InputDiv(props: any) {
   const { value, changeValue, className = '', placeholder, style, page } = props
-  const [state, setState] = useState({
-    focus: false,
-    compileValue: ''
-  })
-
   const getCompileValue = useCallback(
     (inputValue: string) => {
       let compileValue = ''
@@ -34,6 +29,11 @@ export default function InputDiv(props: any) {
     },
     [page]
   )
+
+  const [state, setState] = useState({
+    focus: false,
+    compileValue: getCompileValue(value)
+  })
 
   const onBlur = () => {
     setState({
