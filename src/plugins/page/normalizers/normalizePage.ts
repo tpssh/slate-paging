@@ -1,12 +1,4 @@
-import {
-  Transforms,
-  Element,
-  Node,
-  Editor,
-  Path,
-  Range,
-  NodeEntry
-} from 'slate'
+import { Transforms, Element, Node, Editor, Path, NodeEntry } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { SPEditor } from '@udecode/plate-core'
 
@@ -31,6 +23,8 @@ const setTimeRunClearn = (() => {
     }
   }
 })()
+
+const heightWeakMap = new WeakMap()
 
 // TODO
 /**
@@ -87,36 +81,17 @@ const computeRun = (editor: any) => {
   // 清除状态
   setTimeRunClearn()
   isPageNormalize = true
-  let node: any
+  let pageNode: any
   // 遍历page
   while (dirtyNodes.size) {
     const dirtyNodesArr = Array.from(dirtyNodes)
-    node = dirtyNodesArr.shift()
-    dirtyNodes.delete(node)
-    let PageNode
-    // afaik pageNode if inserted as new page is not available here as a dom node because it hasnt rendered yet
-    try {
-      console.log('start toDoM', node)
-      // dom maybe unrender, so node children length diff dom children length
-      PageNode = ReactEditor.toDOMNode(editor, node)
-      console.log(PageNode)
-      console.log(
-        PageNode.children.length,
-        node.children.length,
-        'node.children.length'
-      )
-    } catch (e) {
-      console.error('DOM 转换失败', e)
-      return
-    }
-    let path
-    try {
-      path = ReactEditor.findPath(editor, node)
-    } catch (error) {
-      console.log(error)
+    pageNode = dirtyNodesArr.shift()
+    dirtyNodes.delete(pageNode)
+    const pageElement = getDom(editor, pageNode)
+    const path = getPath(editor, pageNode)
+    if (!path || !pageElement) {
       break
     }
-    console.log(path, 'is pathpathpathpathpathpathpath 循环')
     const nextPagePath = [path[0] + 1]
     let nextPageNodeEntry: NodeEntry<Node> | undefined
     try {
@@ -126,58 +101,34 @@ const computeRun = (editor: any) => {
     }
     const nextPageNode: any = nextPageNodeEntry && nextPageNodeEntry[0]
     const hasNextPage = !!nextPageNode // 还是要基于 slate 的数据结构
+    let countPageHeight = 0
     // 进入高度计算
-    const style = window.getComputedStyle(PageNode)
-    const computedHeight = PageNode.offsetHeight
-    const padding =
-      parseFloat(style.paddingTop || '0') +
-      parseFloat(style.paddingBottom || '0')
-
-    const pageHeight = computedHeight - padding
-
-    let currentPageHeight = 0
-
-    const children: globalThis.Element[] = Array.from(PageNode.children)
-    // top bottom margin merge
-    let preElementBottomMargin = 0
-    // eslint-disable-next-line no-loop-func
-    for (let index = 0; index < children.length; index++) {
-      const child = children[index]
-      const { height: childHeight, marginBottom } = computeItemHeight(
-        child,
-        preElementBottomMargin
+    const pageHeight = getPageHeight(pageElement)
+    if (heightWeakMap.get(pageNode)) {
+      countPageHeight = heightWeakMap.get(pageNode)
+    } else {
+      const { isOverStep, index: overIndex } = getElementChildHeight(
+        pageElement,
+        countPageHeight,
+        pageHeight
       )
-      preElementBottomMargin = marginBottom
-      currentPageHeight = currentPageHeight + childHeight
-      if (currentPageHeight > pageHeight) {
+      if (isOverStep && overIndex) {
         if (hasNextPage && nextPagePath) {
-          moveChildToNextPage(editor, index, path, nextPagePath)
-          Promise.resolve()
-            .then(() => {
-              let nextPageNodeEntry: NodeEntry<Node> | undefined
-              try {
-                nextPageNodeEntry = Editor.node(editor, nextPagePath) // 还是要基于 slate 的数据结构
-              } catch (error) {
-                // nextPageNode = undefined
-              }
-              const nextPageNode = nextPageNodeEntry && nextPageNodeEntry[0]
-              !dirtyNodes.has(nextPageNode) && dirtyNodes.add(nextPageNode)
-              return Promise.resolve()
-            })
-            .then(() => {
-              computeRun(editor)
-            })
+          moveChildToNextPage(editor, overIndex, path, nextPagePath)
+          updateDirtyNode(editor, nextPagePath)
           // 后续所有元素进行迁移，停止循环
           break
         } else {
-          createPageAndMove(editor, index, path, node)
+          createPageAndMove(editor, overIndex, path, pageNode)
           // 后续所有元素进行迁移，停止循环
           break
         }
       }
+      heightWeakMap.set(pageNode, countPageHeight)
     }
+
     const prevPageNeedFill =
-      currentPageHeight < pageHeight &&
+      countPageHeight < pageHeight &&
       hasNextPage &&
       nextPagePath &&
       nextPageNode
@@ -185,15 +136,12 @@ const computeRun = (editor: any) => {
     //  we need move this node
     if (prevPageNeedFill) {
       console.log('if current page have enough height can contain next')
-      let empytHeiht = pageHeight - currentPageHeight
-      let nextPageNodes
-      try {
-        nextPageNodes = ReactEditor.toDOMNode(editor, nextPageNode)
-      } catch (error) {
-        console.log(error)
+      let empytHeiht = pageHeight - countPageHeight
+      let nextPageElement = getDom(editor, nextPageNode)
+      if (!nextPageElement) {
         break
       }
-      const nextPageChildren = Array.from(nextPageNodes.children)
+      const nextPageChildren = Array.from(nextPageElement.children)
       // top bottom margin merge
       let preElementBottomMargin = 0
       for (let index = 0; index < nextPageChildren.length; index++) {
@@ -205,7 +153,7 @@ const computeRun = (editor: any) => {
         preElementBottomMargin = marginBottom
         if (empytHeiht < childHeight) break
         empytHeiht = empytHeiht - childHeight
-        const toPath = path.concat([node.children.length])
+        const toPath = path.concat([pageNode.children.length])
         // 提升当前的 DOM
         riseElementToPrevPage(editor, index, nextPagePath, toPath)
         // if move done, this page is empty, remove this page
@@ -217,6 +165,94 @@ const computeRun = (editor: any) => {
       }
     }
   }
+}
+
+/**
+ * 添加需要计算的 Node
+ * @param editor
+ * @param path
+ */
+function updateDirtyNode(editor: ReactEditor & SPEditor, path: any) {
+  Promise.resolve()
+    .then(() => {
+      let nextPageNodeEntry: NodeEntry<Node> | undefined
+      try {
+        nextPageNodeEntry = Editor.node(editor, path) // 还是要基于 slate 的数据结构
+      } catch (error) {
+        console.error(error)
+      }
+      const nextPageNode = nextPageNodeEntry && nextPageNodeEntry[0]
+      !dirtyNodes.has(nextPageNode) && dirtyNodes.add(nextPageNode)
+      return Promise.resolve()
+    })
+    .then(() => {
+      computeRun(editor)
+    })
+}
+
+function getElementChildHeight(
+  element: HTMLElement,
+  countPageHeight: number,
+  pageHeight: number
+) {
+  const children: globalThis.Element[] = Array.from(element.children)
+  // top bottom margin merge
+  let preElementBottomMargin = 0
+  for (let index = 0; index < children.length; index++) {
+    const child = children[index]
+    const { height: childHeight, marginBottom } = computeItemHeight(
+      child,
+      preElementBottomMargin
+    )
+    preElementBottomMargin = marginBottom
+    countPageHeight = countPageHeight + childHeight
+    if (countPageHeight > pageHeight) {
+      return { isOverStep: true, index }
+    }
+  }
+  return { isOverStep: false }
+}
+
+/**
+ * trycatch 获取path
+ * @param editor
+ * @param node
+ * @returns
+ */
+function getPath(editor: ReactEditor & SPEditor, node: Node) {
+  let path
+  try {
+    path = ReactEditor.findPath(editor, node)
+  } catch (error) {
+    console.log(error)
+  }
+  return path
+}
+/**
+ * try catch 获取 DOM
+ * @param editor
+ * @param node
+ * @returns
+ */
+function getDom(editor: ReactEditor & SPEditor, node: Node) {
+  let nodeElement
+  try {
+    nodeElement = ReactEditor.toDOMNode(editor, node)
+  } catch (error) {
+    console.error('DOM 转换失败', error)
+  }
+  return nodeElement
+}
+
+// 进入高度计算
+function getPageHeight(PageNode: HTMLElement) {
+  const style = window.getComputedStyle(PageNode)
+  const computedHeight = PageNode.offsetHeight
+  const padding =
+    parseFloat(style.paddingTop || '0') + parseFloat(style.paddingBottom || '0')
+
+  const pageHeight = computedHeight - padding
+  return pageHeight
 }
 
 function computeItemHeight(
