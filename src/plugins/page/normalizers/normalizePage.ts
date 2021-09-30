@@ -1,4 +1,12 @@
-import { Transforms, Element, Node, Editor, Path, Range } from 'slate'
+import {
+  Transforms,
+  Element,
+  Node,
+  Editor,
+  Path,
+  Range,
+  NodeEntry
+} from 'slate'
 import { ReactEditor } from 'slate-react'
 import { SPEditor } from '@udecode/plate-core'
 
@@ -8,7 +16,21 @@ const emptyPage = {
 }
 
 const dirtyNodes: Set<any> = new Set()
+let asyncPromise = Promise.resolve()
 let isPageNormalize = false
+
+const setTimeRunClearn = (() => {
+  let timer: null | Number
+  return () => {
+    if (!timer) {
+      timer = setTimeout(() => {
+        isPageNormalize = false
+        dirtyNodes.clear()
+        timer = null
+      })
+    }
+  }
+})()
 
 // TODO
 /**
@@ -25,111 +47,22 @@ let isPageNormalize = false
  * 3、当前页面高度累加超出当前页面高度，则后续的元素都需要移动到下一页
  * 4、当前页面高度累加不足，且存在下页，则需要把下一页元素向上移动
  */
+
 export const normalizePage = (editor: ReactEditor & SPEditor) => {
   // can include custom normalisations---
   const { normalizeNode } = editor
   return (entry: any) => {
     let [node, path] = entry
-    console.log('into normalizePage')
     // if the node is Page
     if (Element.isElement(node) && (node as any).type === 'page') {
       if (!isPageNormalize && !dirtyNodes.size) {
-        Promise.resolve().then(() => {
-          setTimeout(() => {
-            isPageNormalize = false
-            dirtyNodes.clear()
-          })
-          console.log(dirtyNodes.size, 'dirtyNodesdirtyNodes 长度')
-          isPageNormalize = true
-          // 遍历page
-          const dirtyNodesArr = Array.from(dirtyNodes)
-          while (dirtyNodesArr.length) {
-            node = dirtyNodesArr.shift()
-            let PageNode
-            // afaik pageNode if inserted as new page is not available here as a dom node because it hasnt rendered yet
-            try {
-              // dom maybe unrender, so node children length diff dom children length
-              PageNode = ReactEditor.toDOMNode(editor, node)
-              console.log(PageNode)
-              console.log(
-                PageNode.children.length,
-                node.children.length,
-                'node.children.length'
-              )
-            } catch (e) {
-              return
-            }
-            const hasNextPage = !!dirtyNodesArr.length
-            const path = ReactEditor.findPath(editor, node)
-            const nextPagePath = [path[0] + 1]
-            console.log(
-              ReactEditor.findPath(editor, node),
-              ' ReactEditor.findPath(editor, node)'
-            )
-            const style = window.getComputedStyle(PageNode)
-            const computedHeight = PageNode.offsetHeight
-            const padding =
-              parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
-
-            const pageHeight = computedHeight - padding
-
-            let currentPageHeight = 0
-
-            const children: globalThis.Element[] = Array.from(PageNode.children)
-            // top bottom margin merge
-            let preElementBottomMargin = 0
-            // eslint-disable-next-line no-loop-func
-            children.forEach((child, index) => {
-              const { height: childHeight, marginBottom } = computeItemHeight(
-                child,
-                preElementBottomMargin
-              )
-              preElementBottomMargin = marginBottom
-              currentPageHeight = currentPageHeight + childHeight
-              if (currentPageHeight > pageHeight) {
-                if (hasNextPage && nextPagePath) {
-                  moveChildToNextPage(editor, index, path, nextPagePath)
-                } else {
-                  createPageAndMove(editor, index, path, node)
-                }
-              }
-            })
-            // if current page have enough height can contain next page first child node,
-            //  we need move this node
-            if (currentPageHeight < pageHeight && hasNextPage && nextPagePath) {
-              console.log('if current page have enough height can contain next')
-              let empytHeiht = pageHeight - currentPageHeight
-              const nextPageNodes = ReactEditor.toDOMNode(
-                editor,
-                dirtyNodesArr[0]
-              )
-              const nextPageChildren = Array.from(nextPageNodes.children)
-              // top bottom margin merge
-              let preElementBottomMargin = 0
-              for (let index = 0; index < nextPageChildren.length; index++) {
-                const nextPageChildNode = nextPageChildren[index]
-                const { height: childHeight, marginBottom } = computeItemHeight(
-                  nextPageChildNode,
-                  preElementBottomMargin
-                )
-                preElementBottomMargin = marginBottom
-                if (empytHeiht < childHeight) break
-                empytHeiht = empytHeiht - childHeight
-                const toPath = path.concat([node.children.length])
-                riseElementToPrevPage(editor, index, nextPagePath, toPath)
-                // if move done, this page is empty, remove this page
-                if (index === nextPageChildren.length - 1) {
-                  Transforms.removeNodes(editor, {
-                    at: nextPagePath
-                  })
-                }
-              }
-            }
-          }
+        // 等待操作了 DOM 后，进行计算 DOM 位置信息
+        asyncPromise.then(() => {
+          computeRun(editor)
         })
       }
       if (!isPageNormalize) {
-        // 前后一页都要变脏
+        // 前一页要变脏，上一页是空的，下一页要补上
         if (!dirtyNodes.size) {
           const [prevNode] =
             Editor.previous(editor, {
@@ -140,20 +73,149 @@ export const normalizePage = (editor: ReactEditor & SPEditor) => {
           }
         }
         !dirtyNodes.has(node) && dirtyNodes.add(node)
-
-        const [nextNode] =
-          Editor.next(editor, {
-            at: path
-          }) || []
-        if (nextNode) {
-          !dirtyNodes.has(nextNode) && dirtyNodes.add(nextNode)
-        }
       }
       return
     }
 
     // Fall back to the original `normalizeNode` to enforce other constraints.
     return normalizeNode(entry)
+  }
+}
+
+const computeRun = (editor: any) => {
+  console.log(dirtyNodes.size, 'dirtyNodesdirtyNodes 长度')
+  // 清除状态
+  setTimeRunClearn()
+  isPageNormalize = true
+  let node: any
+  // 遍历page
+  while (dirtyNodes.size) {
+    const dirtyNodesArr = Array.from(dirtyNodes)
+    node = dirtyNodesArr.shift()
+    dirtyNodes.delete(node)
+    let PageNode
+    // afaik pageNode if inserted as new page is not available here as a dom node because it hasnt rendered yet
+    try {
+      console.log('start toDoM', node)
+      // dom maybe unrender, so node children length diff dom children length
+      PageNode = ReactEditor.toDOMNode(editor, node)
+      console.log(PageNode)
+      console.log(
+        PageNode.children.length,
+        node.children.length,
+        'node.children.length'
+      )
+    } catch (e) {
+      console.error('DOM 转换失败', e)
+      return
+    }
+    let path
+    try {
+      path = ReactEditor.findPath(editor, node)
+    } catch (error) {
+      console.log(error)
+      break
+    }
+    console.log(path, 'is pathpathpathpathpathpathpath 循环')
+    const nextPagePath = [path[0] + 1]
+    let nextPageNodeEntry: NodeEntry<Node> | undefined
+    try {
+      nextPageNodeEntry = Editor.node(editor, nextPagePath) // 还是要基于 slate 的数据结构
+    } catch (error) {
+      console.log(nextPagePath, '没有这个slate 节点，已经是最后一个节点了')
+    }
+    const nextPageNode: any = nextPageNodeEntry && nextPageNodeEntry[0]
+    const hasNextPage = !!nextPageNode // 还是要基于 slate 的数据结构
+    // 进入高度计算
+    const style = window.getComputedStyle(PageNode)
+    const computedHeight = PageNode.offsetHeight
+    const padding =
+      parseFloat(style.paddingTop || '0') +
+      parseFloat(style.paddingBottom || '0')
+
+    const pageHeight = computedHeight - padding
+
+    let currentPageHeight = 0
+
+    const children: globalThis.Element[] = Array.from(PageNode.children)
+    // top bottom margin merge
+    let preElementBottomMargin = 0
+    // eslint-disable-next-line no-loop-func
+    for (let index = 0; index < children.length; index++) {
+      const child = children[index]
+      const { height: childHeight, marginBottom } = computeItemHeight(
+        child,
+        preElementBottomMargin
+      )
+      preElementBottomMargin = marginBottom
+      currentPageHeight = currentPageHeight + childHeight
+      if (currentPageHeight > pageHeight) {
+        if (hasNextPage && nextPagePath) {
+          moveChildToNextPage(editor, index, path, nextPagePath)
+          Promise.resolve()
+            .then(() => {
+              let nextPageNodeEntry: NodeEntry<Node> | undefined
+              try {
+                nextPageNodeEntry = Editor.node(editor, nextPagePath) // 还是要基于 slate 的数据结构
+              } catch (error) {
+                // nextPageNode = undefined
+              }
+              const nextPageNode = nextPageNodeEntry && nextPageNodeEntry[0]
+              !dirtyNodes.has(nextPageNode) && dirtyNodes.add(nextPageNode)
+              return Promise.resolve()
+            })
+            .then(() => {
+              computeRun(editor)
+            })
+          // 后续所有元素进行迁移，停止循环
+          break
+        } else {
+          createPageAndMove(editor, index, path, node)
+          // 后续所有元素进行迁移，停止循环
+          break
+        }
+      }
+    }
+    const prevPageNeedFill =
+      currentPageHeight < pageHeight &&
+      hasNextPage &&
+      nextPagePath &&
+      nextPageNode
+    // if current page have enough height can contain next page first child node,
+    //  we need move this node
+    if (prevPageNeedFill) {
+      console.log('if current page have enough height can contain next')
+      let empytHeiht = pageHeight - currentPageHeight
+      let nextPageNodes
+      try {
+        nextPageNodes = ReactEditor.toDOMNode(editor, nextPageNode)
+      } catch (error) {
+        console.log(error)
+        break
+      }
+      const nextPageChildren = Array.from(nextPageNodes.children)
+      // top bottom margin merge
+      let preElementBottomMargin = 0
+      for (let index = 0; index < nextPageChildren.length; index++) {
+        const nextPageChildNode = nextPageChildren[index]
+        const { height: childHeight, marginBottom } = computeItemHeight(
+          nextPageChildNode,
+          preElementBottomMargin
+        )
+        preElementBottomMargin = marginBottom
+        if (empytHeiht < childHeight) break
+        empytHeiht = empytHeiht - childHeight
+        const toPath = path.concat([node.children.length])
+        // 提升当前的 DOM
+        riseElementToPrevPage(editor, index, nextPagePath, toPath)
+        // if move done, this page is empty, remove this page
+        if (index === nextPageChildren.length - 1) {
+          Transforms.removeNodes(editor, {
+            at: nextPagePath
+          })
+        }
+      }
+    }
   }
 }
 
@@ -194,7 +256,7 @@ function moveChildToNextPage(
       if (
         !Editor.isEditor(n) &&
         Element.isElement(n) &&
-        (n as any).type !== 'page'
+        ['h1', 'h2', 'p', 'ul'].includes((n as any).type)
       ) {
         return nodePathIndex++ >= splitIndex
       }
@@ -220,8 +282,9 @@ function createPageAndMove(
       if (
         !Editor.isEditor(n) &&
         Element.isElement(n) &&
-        (n as any).type !== 'page'
+        ['h1', 'h2', 'p', 'ul'].includes((n as any).type)
       ) {
+        console.log((n as any).type, nodePathIndex, splitIndex)
         return nodePathIndex++ >= splitIndex
       }
       return false
@@ -257,6 +320,7 @@ function riseElementToPrevPage(
       if (
         !Editor.isEditor(n) &&
         Element.isElement(n) &&
+        ['h1', 'h2', 'p', 'ul'].includes((n as any).type) &&
         (n as any).type !== 'page'
       ) {
         let path

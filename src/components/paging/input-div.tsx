@@ -18,7 +18,6 @@ export default function InputDiv(props: any) {
         const val = compileFn({
           page
         })
-        console.log(val, 'is value  compile')
         compileValue = val
       } catch (error) {
         console.log(' 无效  变量 呀兄弟 is value  compile')
