@@ -357,7 +357,6 @@ const RichText = ({ config, eventBus }: any) => {
           onChange={(val) => {
             console.log(val)
             editor && slateEditor.normalize(editor)
-            console.log('normalize 开始拉')
             pageContext.setData(val)
             // setValue(val)
             // pubInstance.publish('update', val)

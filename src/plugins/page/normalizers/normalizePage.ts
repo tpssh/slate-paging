@@ -77,12 +77,13 @@ export const normalizePage = (editor: ReactEditor & SPEditor) => {
 }
 
 const computeRun = (editor: any) => {
-  console.log(dirtyNodes.size, 'dirtyNodesdirtyNodes 长度')
+  // console.log(dirtyNodes.size, 'dirtyNodesdirtyNodes 长度')
   // 清除状态
   setTimeRunClearn()
   isPageNormalize = true
   let pageNode: any
   // 遍历page
+  console.time('while 循环')
   while (dirtyNodes.size) {
     const dirtyNodesArr = Array.from(dirtyNodes)
     pageNode = dirtyNodesArr.shift()
@@ -105,13 +106,16 @@ const computeRun = (editor: any) => {
     // 进入高度计算
     const pageHeight = getPageHeight(pageElement)
     if (heightWeakMap.get(pageNode)) {
+      console.error('获取到了缓存')
       countPageHeight = heightWeakMap.get(pageNode)
     } else {
-      const { isOverStep, index: overIndex } = getElementChildHeight(
-        pageElement,
-        countPageHeight,
-        pageHeight
-      )
+      console.log('没有缓存')
+      const {
+        isOverStep,
+        index: overIndex,
+        countPageHeight: newCountPageHeight
+      } = getElementChildHeight(pageElement, countPageHeight, pageHeight)
+      countPageHeight = newCountPageHeight
       if (isOverStep && overIndex) {
         if (hasNextPage && nextPagePath) {
           moveChildToNextPage(editor, overIndex, path, nextPagePath)
@@ -135,7 +139,7 @@ const computeRun = (editor: any) => {
     // if current page have enough height can contain next page first child node,
     //  we need move this node
     if (prevPageNeedFill) {
-      console.log('if current page have enough height can contain next')
+      // console.log('if current page have enough height can contain next')
       let empytHeiht = pageHeight - countPageHeight
       let nextPageElement = getDom(editor, nextPageNode)
       if (!nextPageElement) {
@@ -155,6 +159,7 @@ const computeRun = (editor: any) => {
         empytHeiht = empytHeiht - childHeight
         const toPath = path.concat([pageNode.children.length])
         // 提升当前的 DOM
+        debugger
         riseElementToPrevPage(editor, index, nextPagePath, toPath)
         // if move done, this page is empty, remove this page
         if (index === nextPageChildren.length - 1) {
@@ -165,6 +170,7 @@ const computeRun = (editor: any) => {
       }
     }
   }
+  console.timeEnd('while 循环')
 }
 
 /**
@@ -207,10 +213,10 @@ function getElementChildHeight(
     preElementBottomMargin = marginBottom
     countPageHeight = countPageHeight + childHeight
     if (countPageHeight > pageHeight) {
-      return { isOverStep: true, index }
+      return { isOverStep: true, index, countPageHeight }
     }
   }
-  return { isOverStep: false }
+  return { isOverStep: false, countPageHeight }
 }
 
 /**
@@ -320,7 +326,7 @@ function createPageAndMove(
         Element.isElement(n) &&
         ['h1', 'h2', 'p', 'ul'].includes((n as any).type)
       ) {
-        console.log((n as any).type, nodePathIndex, splitIndex)
+        // console.log((n as any).type, nodePathIndex, splitIndex)
         return nodePathIndex++ >= splitIndex
       }
       return false
