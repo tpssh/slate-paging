@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/slate-paging/static/css/main.920f5cdc.chunk.css",
-    "main.js": "/slate-paging/static/js/main.1f9ee1a4.chunk.js",
-    "main.js.map": "/slate-paging/static/js/main.1f9ee1a4.chunk.js.map",
+    "main.js": "/slate-paging/static/js/main.4d51b2e3.chunk.js",
+    "main.js.map": "/slate-paging/static/js/main.4d51b2e3.chunk.js.map",
     "runtime-main.js": "/slate-paging/static/js/runtime-main.c4ac4518.js",
     "runtime-main.js.map": "/slate-paging/static/js/runtime-main.c4ac4518.js.map",
     "static/css/2.04607c25.chunk.css": "/slate-paging/static/css/2.04607c25.chunk.css",
@@ -20,6 +20,6 @@
     "static/css/2.04607c25.chunk.css",
     "static/js/2.9880e0f9.chunk.js",
     "static/css/main.920f5cdc.chunk.css",
-    "static/js/main.1f9ee1a4.chunk.js"
+    "static/js/main.4d51b2e3.chunk.js"
   ]
 }
