@@ -6,7 +6,8 @@ const emptyPage = {
   type: 'page',
   children: []
 }
-
+// 进行移动操作的匹配tag
+const matchTag = ['h1', 'h2', 'p', 'ul', 'ol', 'table']
 const dirtyNodes: Set<any> = new Set()
 let asyncPromise = Promise.resolve()
 let isPageNormalize = false
@@ -292,6 +293,7 @@ function moveChildToNextPage(
   formPath: Path,
   toPath: Path
 ): void {
+  console.log('moveChildToNextPage')
   let nodePathIndex = 0
   Transforms.moveNodes(editor, {
     at: formPath,
@@ -299,7 +301,7 @@ function moveChildToNextPage(
       if (
         !Editor.isEditor(n) &&
         Element.isElement(n) &&
-        ['h1', 'h2', 'p', 'ul'].includes((n as any).type)
+        matchTag.includes((n as any).type)
       ) {
         return nodePathIndex++ >= splitIndex
       }
@@ -315,6 +317,7 @@ function createPageAndMove(
   formPath: Path,
   entryNode: Node
 ) {
+  console.log('createPageAndMove')
   // use index record nodes path, because node cant find path in this time.
   let nodePathIndex = 0
   // need create page node
@@ -325,7 +328,7 @@ function createPageAndMove(
       if (
         !Editor.isEditor(n) &&
         Element.isElement(n) &&
-        ['h1', 'h2', 'p', 'ul'].includes((n as any).type)
+        matchTag.includes((n as any).type)
       ) {
         // console.log((n as any).type, nodePathIndex, splitIndex)
         return nodePathIndex++ >= splitIndex
@@ -356,6 +359,7 @@ function riseElementToPrevPage(
   formPath: Path,
   toPath: Path
 ) {
+  console.log('riseElementToPrevPage')
   Transforms.moveNodes(editor, {
     at: formPath,
     // eslint-disable-next-line space-before-function-paren
@@ -363,7 +367,7 @@ function riseElementToPrevPage(
       if (
         !Editor.isEditor(n) &&
         Element.isElement(n) &&
-        ['h1', 'h2', 'p', 'ul'].includes((n as any).type) &&
+        matchTag.includes((n as any).type) &&
         (n as any).type !== 'page'
       ) {
         let path
