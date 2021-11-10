@@ -1,29 +1,24 @@
-import React, { useContext, useState } from 'react'
-import { PageContext } from '../../env'
-import InputDiv from './input-div'
+import React, { useContext } from 'react'
 
-export default function Paging(props: any) {
-  const pageContext = useContext(PageContext)
-  const data = pageContext.data
+import { PageContext } from '../../env'
+import PageHeader from './Pageheader'
+
+// 一页的高度  用于计算位置
+const pageHeight = 1122
+// const pageToolHeight = 0
+const pageToolHeight = 60
+const selfHeight = 44
+
+export default function Paging() {
+  const data = useContext(PageContext)
   const arrs = new Array(data.page).fill('')
-  // 一页的高度  用于计算位置
-  const pageHeight = 1122
-  // const pageToolHeight = 0
-  const pageToolHeight = 60
-  const selfHeight = 44
-  const changeHeader = (e: string) => {
-    pageContext.setPageData({ ...data, headerValue: e })
-  }
-  const changeFooter = (e: string) => {
-    pageContext.setPageData({ ...data, footerValue: e })
-  }
 
   return (
     <div className='paging-com'>
       {arrs.map((v, index) => {
         return (
           <div key={'page-warp' + index}>
-            <InputDiv
+            {/* <InputDiv
               style={{
                 top: index * pageHeight + pageToolHeight + 'px'
               }}
@@ -31,17 +26,26 @@ export default function Paging(props: any) {
               page={index + 1}
               value={data.headerValue}
               placeholder={'点击输入页眉'}
-            ></InputDiv>
-            <InputDiv
+            ></InputDiv> */}
+            {/* <div
+              className='page-input-warp'
               style={{
-                top:
-                  (index + 1) * pageHeight + pageToolHeight - selfHeight + 'px'
+                top: index * pageHeight + pageToolHeight + 'px'
               }}
-              changeValue={changeFooter}
-              page={index + 1}
-              value={data.footerValue}
-              placeholder={'点击输入页脚'}
-            ></InputDiv>
+            ></div> */}
+            <PageHeader
+              top={index * pageHeight + pageToolHeight + 'px'}
+              index={index + 1}
+              all={arrs.length}
+              isHeader={true}
+            ></PageHeader>
+            <PageHeader
+              top={
+                (index + 1) * pageHeight + pageToolHeight - selfHeight + 'px'
+              }
+              index={index + 1}
+              all={arrs.length}
+            ></PageHeader>
           </div>
         )
       })}

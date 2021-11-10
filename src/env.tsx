@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 interface Config {
   model?: string
@@ -6,17 +6,15 @@ interface Config {
   value?: {}
 }
 
-interface reactStyleAttr {
-  textAlign?: 'left' | 'right' | 'center'
-  color?: string
-}
+// interface reactStyleAttr {
+//   textAlign?: 'left' | 'right' | 'center'
+//   color?: string
+// }
 interface PageInfo {
   state: any
   page: number
-  headerValue: string
-  footerValue: string
-  headerAttribute: reactStyleAttr
-  footerAttribute: reactStyleAttr
+  headerAttribute: any
+  footerAttribute: any
 }
 
 let configValue: Config = {}
@@ -34,54 +32,76 @@ export const ConfigContext = React.createContext<Config>({})
 const pageInfo: PageInfo = {
   state: {},
   page: 1,
-  headerValue: '第{{page}}页 点击修改',
-  footerValue: '',
-  headerAttribute: {},
-  footerAttribute: {}
+  headerAttribute: {
+    data: {
+      formatFunIndex: 0,
+      direction: 'center'
+    },
+    value: '',
+    showPage: false
+  },
+  footerAttribute: {
+    data: {
+      formatFunIndex: 0,
+      direction: 'center'
+    },
+    value: '',
+    showPage: false
+  }
 }
 
-export const PageContext = React.createContext<{
-  data: PageInfo
-  setPageData(val: PageInfo): any
-  setData: any
+export const PageContext = React.createContext<PageInfo>(pageInfo)
+
+export const PageDispatchContext = React.createContext<{
+  dispatchPageInfo(val: PageInfo): any
+  dispatchPageEidtor(val: any): any
 }>({
-  data: pageInfo,
-  setPageData: () => {},
-  setData: () => {}
+  dispatchPageInfo: () => {},
+  dispatchPageEidtor: () => {}
 })
 
-export const PageProvider = (props: any) => {
+export const PageProvider = ({ children }: any) => {
   const [data, setData] = useState<PageInfo>(pageInfo)
 
-  const providerValue = useMemo(() => {
-    return {
-      data,
-      setData: (val: any) => {
-        console.log(val, '编辑器的数据')
-        // page 是顶级元素，只要进行一层遍历
-        let page = 0
-        for (let index = 0; index < val.length; index++) {
-          const element = val[index]
-          if (element.type === 'page') {
-            page += 1
-          }
-        }
-        // 计算page
-        const pageInfo = {
-          ...data,
-          page: page
-        }
-        setData(pageInfo)
-      },
-      setPageData(state: PageInfo) {
-        setData(state)
+  const dispatchPageEditInfo = useCallback((val) => {
+    console.log(val, '编辑器的数据')
+    // page 是顶级元素，只要进行一层遍历
+    let page = 0
+    for (let index = 0; index < val.length; index++) {
+      const element = val[index]
+      if (element.type === 'page') {
+        page += 1
       }
     }
-  }, [data, setData])
+    // 计算page
+    setData((prev) => {
+      if (page === prev.page) return prev
+      return {
+        ...prev,
+        page: page
+      }
+    })
+  }, [])
+
+  const dispatchPageInfo = useCallback((val) => {
+    setData((prev) => {
+      return {
+        ...prev,
+        ...val
+      }
+    })
+  }, [])
 
   return (
-    <PageContext.Provider value={providerValue}>
-      {props.children}
+    <PageContext.Provider value={data}>
+      <PageDispatchContext.Provider
+        value={{
+          dispatchPageInfo,
+          dispatchPageEidtor: dispatchPageEditInfo
+        }}
+      >
+        {children}
+      </PageDispatchContext.Provider>
     </PageContext.Provider>
   )
 }

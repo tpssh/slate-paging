@@ -49,3 +49,25 @@ code {
     sans-serif;
   white-space: nowrap;
 }
+
+.page-input-model {
+  display: flex;
+  justify-content: center;
+}
+.header-com {
+  flex-grow: 1;
+}
+.page-header-value {
+  min-height: 1em;
+  min-width: 100%;
+  display: inline-block;
+}
+.page-header-page-text {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 16px;
+  pointer-events: none;
+  text-align: center;
+  z-index: 11;
+}

@@ -79,7 +79,7 @@ import {
   optionsExitBreakPlugin,
   optionsSoftBreakPlugin
 } from './config/pluginOptions'
-import { ConfigContext, PageContext, PageProvider } from './env'
+import { ConfigContext, PageDispatchContext, PageProvider } from './env'
 import { createPagePlugin } from './plugins/page'
 import Paging from './components/paging/index'
 import initData from './initData'
@@ -95,290 +95,9 @@ const RichText = ({ config, eventBus }: any) => {
     ;(window as any).handlePrint = handlePrint
   }, [handlePrint])
 
-  // const initialValueBasicElements = config.value || [
-  //   { type: 'p', children: [{ text: '' }] }
-  // ]
-  // const initialValuePasteHtml: any = [
-  //   {
-  //     type: 'page',
-  //     children: [
-  //       {
-  //         type: 'h1',
-  //         children: [
-  //           {
-  //             text: '🍪 Deserialize HTML'
-  //           }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       },
-  //       {
-  //         type: 'p',
-  //         children: [
-  //           {
-  //             text: "By default, pasting content into a Slate editor will use the clipboard's "
-  //           },
-  //           { text: "'text/plain'", code: true },
-  //           {
-  //             text: " data. That's okay for some use cases, but sometimes you want users to be able to paste in content and have it maintain its formatting. To do this, your editor needs to handle "
-  //           },
-  //           { text: "'text/html'", code: true },
-  //           { text: ' data. ' }
-  //         ]
-  //       }
-  //     ]
-  //   }
-  // ]
-  const initialValuePasteHtml: any = initData
-  const styledComponents = useStyledComponents()
-
-  const defaultOptions = createPlateOptions()
-
   // const Tootip = useMemo(() => {
   //   return modelenv === 'read' ? null : <BallonToolbarMarks />
   // }, [modelenv])
-
-  const Editor = () => {
-    const pluginsMemo = useMemo(() => {
-      const plugins = [
-        createReactPlugin(),
-        createHistoryPlugin(),
-        createParagraphPlugin(),
-        // createBlockquotePlugin(),
-        createTodoListPlugin(),
-        createHeadingPlugin(),
-        createListPlugin(),
-        createPagePlugin(),
-        createTablePlugin(),
-        // createCodeBlockPlugin(),
-        createAlignPlugin(),
-        createBoldPlugin(),
-        createCodePlugin(),
-        createItalicPlugin(),
-        createHighlightPlugin(),
-        createUnderlinePlugin(),
-        createStrikethroughPlugin(),
-        createSubscriptPlugin(),
-        createSuperscriptPlugin(),
-        // 键盘监听
-        createKbdPlugin(),
-        createNodeIdPlugin(),
-        // markdown语法支持
-        // createAutoformatPlugin(optionsAutoformat),
-        // 设置默认模块
-        createResetNodePlugin(optionsResetBlockTypePlugin),
-        // 软换行
-        createSoftBreakPlugin(optionsSoftBreakPlugin),
-        // 退出当前块
-        createExitBreakPlugin(optionsExitBreakPlugin),
-        // 强制布局
-        // createNormalizeTypesPlugin({
-        //   rules: [{ path: [0, 0], strictType: ELEMENT_H1 }],
-        // }),
-        // createTrailingBlockPlugin({
-        //   type: ELEMENT_PARAGRAPH,
-        //   level: 1,
-        // }),
-        createSelectOnBackspacePlugin({ allow: ELEMENT_IMAGE })
-      ]
-      // 处理html文本插入
-      plugins.push(createDeserializeHTMLPlugin({ plugins }))
-
-      return plugins
-    }, [])
-    const pageContext = useContext(PageContext)
-    const editor = useStoreEditorRef()
-    let [value, setValue] = useState<any>(initialValuePasteHtml)
-    const editableProps = {
-      // placeholder: 'Type…',
-      style: {
-        width: '794px',
-        minHeight: '500px',
-        outline: '1px solid rgb(238, 238, 238)'
-      }
-    }
-    return (
-      <ConfigContext.Provider value={config}>
-        <Plate
-          id={id}
-          plugins={pluginsMemo}
-          onChange={(val) => {
-            console.log(val)
-            editor && slateEditor.normalize(editor)
-            pageContext.setData(val)
-            // setValue(val)
-            // pubInstance.publish('update', val)
-          }}
-          components={styledComponents}
-          options={defaultOptions}
-          editableProps={editableProps}
-          initialValue={value}
-        >
-          <HeadingToolbar styles={{ root: { margin: '0px -20px 0' } }}>
-            <ToolbarButtonsBasicElements />
-            <ToolbarButtonsList />
-            <ToolbarButtonsBasicMarks />
-            <ToolbarButtonsAlign />
-            <ToolbarButtonsTable />
-          </HeadingToolbar>
-          <BallonToolbarMarks></BallonToolbarMarks>
-          <Paging></Paging>
-        </Plate>
-      </ConfigContext.Provider>
-    )
-  }
 
   return (
     <div
@@ -389,10 +108,107 @@ const RichText = ({ config, eventBus }: any) => {
           : 'slate-editor-core'
       }
     >
-      {/* <PageProvider> */}
-      <Editor />
-      {/* </PageProvider> */}
+      <PageProvider>
+        <Editor id={config.id} />
+        <Paging></Paging>
+      </PageProvider>
     </div>
+  )
+}
+
+const Editor = ({ id }: any) => {
+  const initialValuePasteHtml: any = initData
+  const styledComponents = useStyledComponents()
+
+  const defaultOptions = createPlateOptions()
+  const pluginsMemo = useMemo(() => {
+    const plugins = [
+      createReactPlugin(),
+      createHistoryPlugin(),
+      createParagraphPlugin(),
+      // createBlockquotePlugin(),
+      createTodoListPlugin(),
+      createHeadingPlugin(),
+      createListPlugin(),
+      createPagePlugin(),
+      createTablePlugin(),
+      // createCodeBlockPlugin(),
+      createAlignPlugin(),
+      createBoldPlugin(),
+      createCodePlugin(),
+      createItalicPlugin(),
+      createHighlightPlugin(),
+      createUnderlinePlugin(),
+      createStrikethroughPlugin(),
+      createSubscriptPlugin(),
+      createSuperscriptPlugin(),
+      // 键盘监听
+      createKbdPlugin(),
+      createNodeIdPlugin(),
+      // markdown语法支持
+      // createAutoformatPlugin(optionsAutoformat),
+      // 设置默认模块
+      createResetNodePlugin(optionsResetBlockTypePlugin),
+      // 软换行
+      createSoftBreakPlugin(optionsSoftBreakPlugin),
+      // 退出当前块
+      createExitBreakPlugin(optionsExitBreakPlugin),
+      // 强制布局
+      // createNormalizeTypesPlugin({
+      //   rules: [{ path: [0, 0], strictType: ELEMENT_H1 }],
+      // }),
+      // createTrailingBlockPlugin({
+      //   type: ELEMENT_PARAGRAPH,
+      //   level: 1,
+      // }),
+      createSelectOnBackspacePlugin({ allow: ELEMENT_IMAGE })
+    ]
+    // 处理html文本插入
+    plugins.push(createDeserializeHTMLPlugin({ plugins }))
+
+    return plugins
+  }, [])
+  const { dispatchPageEidtor } = useContext(PageDispatchContext)
+  const editor = useStoreEditorRef()
+  let [value, setValue] = useState<any>(initialValuePasteHtml)
+  const editableProps = {
+    // placeholder: 'Type…',
+    style: {
+      width: '794px',
+      minHeight: '500px',
+      outline: '1px solid rgb(238, 238, 238)'
+    }
+  }
+  useEffect(() => {
+    dispatchPageEidtor(value)
+  }, [])
+  return (
+    // <ConfigContext.Provider value={config}>
+    <Plate
+      id={id}
+      plugins={pluginsMemo}
+      onChange={(val) => {
+        console.log(val)
+        editor && slateEditor.normalize(editor)
+        dispatchPageEidtor(val)
+        // setValue(val)
+        // pubInstance.publish('update', val)
+      }}
+      components={styledComponents}
+      options={defaultOptions}
+      editableProps={editableProps}
+      initialValue={value}
+    >
+      <HeadingToolbar styles={{ root: { margin: '0px -20px 0' } }}>
+        <ToolbarButtonsBasicElements />
+        <ToolbarButtonsList />
+        <ToolbarButtonsBasicMarks />
+        <ToolbarButtonsAlign />
+        <ToolbarButtonsTable />
+      </HeadingToolbar>
+      <BallonToolbarMarks></BallonToolbarMarks>
+    </Plate>
+    // </ConfigContext.Provider>
   )
 }
 
